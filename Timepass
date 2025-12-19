@@ -1,60 +1,66 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- SERVICES
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 
-local Window = Rayfield:CreateWindow({
-   Name = "Learning universal scripts",
-   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
-   LoadingTitle = "Test Hub",
-   LoadingSubtitle = "by Techno_maker17",
-   ShowText = "TechnoMaker", -- for mobile users to unhide rayfield, change if you'd like
-   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+local player = Players.LocalPlayer
 
-   ToggleUIKeybind = "K", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
+-- STATE
+local infiniteJumpEnabled = false
 
-   DisableRayfieldPrompts = false,
-   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "InfiniteJumpToggleGui"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
 
-   ConfigurationSaving = {
-      Enabled = false,
-      FolderName = nil, -- Create a custom folder for your hub/game
-      FileName = "Big Hub"
-   },
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 220, 0, 100)
+frame.Position = UDim2.new(0.5, -110, 0.4, 0)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
 
-   Discord = {
-      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
-      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
-      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
-   },
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Text = "Infinite Jump"
+title.TextColor3 = Color3.new(1,1,1)
+title.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+title.Parent = frame
 
-   KeySystem = false, -- Set this to true to use our key system
-   KeySettings = {
-      Title = "Untitled",
-      Subtitle = "Key System",
-      Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
-      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
-      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
-      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
-      Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
-   }
-})
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 160, 0, 40)
+button.Position = UDim2.new(0.5, -80, 0, 45)
+button.Text = "OFF"
+button.TextScaled = true
+button.BackgroundColor3 = Color3.fromRGB(170, 60, 60)
+button.TextColor3 = Color3.new(1,1,1)
+button.Parent = frame
 
-local MainTab = Window:CreateTab("Main", nil) -- Title, Image
-local MainSection = MainTab:CreateSection("Player Stats")
+-- BUTTON LOGIC
+button.MouseButton1Click:Connect(function()
+	infiniteJumpEnabled = not infiniteJumpEnabled
 
-Rayfield:Notify({
-   Title = "This is test gui",
-   Content = "Some features may not work",
-   Duration = 3,
-   Image = nil,
-})
-
-local Button = MainTab:CreateButton({
-   Name = "Infinite jump",
-   Callback = function()
-local InfiniteJumpEnabled = true
-game:GetService("UserInputService").JumpRequest:connect(function()
-	if InfiniteJumpEnabled then
-		game:GetService"Players".LocalPlayer.Character:FindFirstChildOfClass'Humanoid':ChangeState("Jumping")
+	if infiniteJumpEnabled then
+		button.Text = "ON"
+		button.BackgroundColor3 = Color3.fromRGB(60, 170, 60)
+	else
+		button.Text = "OFF"
+		button.BackgroundColor3 = Color3.fromRGB(170, 60, 60)
 	end
 end)
-   end,
-})
+
+-- INFINITE JUMP
+UserInputService.JumpRequest:Connect(function()
+	if infiniteJumpEnabled then
+		local character = player.Character
+		if character then
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+		end
+	end
+end)
+
+print("Infinite Jump toggle loaded")
